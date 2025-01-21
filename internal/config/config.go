@@ -7,14 +7,21 @@ import (
 	"os"
 )
 
-func Read() Config {
+const configFileName = ".gatorconfig.json"
+
+type Config struct {
+	DbURL           string `json:"db_url"`
+	CurrentUserName string `json:"current_user_name"`
+}
+
+func Read() (Config, error) {
 
 	cfg := Config{}
 
 	path, err := getConfigFilePath()
 	if err != nil {
 		fmt.Println("Error: ", err)
-		return cfg
+		return cfg, err
 	}
 
 	// Open our jsonFile
@@ -22,7 +29,7 @@ func Read() Config {
 	// if we os.Open returns an error then handle it
 	if err != nil {
 		fmt.Println(err)
-		return cfg
+		return cfg, err
 	}
 	fmt.Println("Successfully Opened ", path)
 	// defer the closing of our jsonFile so that we can parse it later on
@@ -32,18 +39,24 @@ func Read() Config {
 
 	if err != nil {
 		fmt.Print(err)
+		return cfg, err
 	}
 	err = json.Unmarshal(byteValue, &cfg)
 	if err != nil {
 		fmt.Print(err)
+		return Config{}, err
 	}
 
-	return cfg
+	return cfg, nil
 }
 
-func SetUser(name string, cfg Config) {
+func SetUser(name string, cfg Config) error {
 	cfg.CurrentUserName = name
-	write(cfg)
+	err := write(cfg)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func getConfigFilePath() (string, error) {
