@@ -17,7 +17,7 @@ INNER JOIN users
     ON feeds.user_id = users.id;
 
 -- name: FeedByURL :one
-SELECT id
+SELECT *
 FROM feeds
 WHERE url = $1;
 
@@ -54,3 +54,28 @@ feeds.name AS feed_name
     INNER JOIN feeds
         ON feed_follows.feed_id = feeds.id
 WHERE feed_follows.user_id = $1;
+
+-- name: DeleteFeedFollow :exec
+
+DELETE
+FROM feed_follows
+USING feeds, users
+WHERE 
+feed_follows.feed_id = feeds.id
+AND feed_follows.user_id = users.id
+AND users.name = $1 AND feeds.url = $2;
+
+-- name: MarkFeedFetched :exec
+UPDATE feeds
+SET 
+last_fetched_at = NOW() ::TIMESTAMP,
+updated_at = NOW() ::TIMESTAMP
+WHERE feeds.id = $1;
+
+-- name: GetNextFeedToFetch :one
+SELECT *
+FROM feeds
+ORDER BY last_fetched_at ASC NULLS FIRST
+LIMIT 1;
+
+

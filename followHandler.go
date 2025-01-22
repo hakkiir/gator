@@ -10,17 +10,13 @@ import (
 	"github.com/hakkiir/gator/internal/database"
 )
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 
 	if len(cmd.Args) == 0 {
 		return errors.New("not enoughr arguments: url needed")
 	}
 	url := cmd.Args[0]
-	name := s.cfg.CurrentUserName
-	userID, err := s.db.GetUser(context.Background(), name)
-	if err != nil {
-		return err
-	}
+
 	feedId, err := s.db.FeedByURL(context.Background(), url)
 	if err != nil {
 		return err
@@ -29,8 +25,8 @@ func handlerFollow(s *state, cmd command) error {
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID:    userID.ID,
-		FeedID:    feedId,
+		UserID:    user.ID,
+		FeedID:    feedId.ID,
 	})
 	if err != nil {
 		return err
