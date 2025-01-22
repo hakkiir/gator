@@ -1,1 +1,5 @@
-asd
+# Gator
+
+Dependencies:
+- GO
+- Postgresql 
