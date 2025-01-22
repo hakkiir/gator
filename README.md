@@ -1,4 +1,4 @@
-# Gator
+# gator
 
 Dependencies:
 - GO
